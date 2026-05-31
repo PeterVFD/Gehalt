@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gehaltsrechner bei geänderter Arbeitszeit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+      color: #111;
+    }
+
+    p.info {
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #cfd6dd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .btn-primary {
+      background: #0078d4;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #222;
+    }
+
+    .result {
+      margin-top: 24px;
+      padding: 18px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .result h2 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    .result-row {
+      margin: 10px 0;
+      font-size: 17px;
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: #0a5;
+    }
+
+    .negative {
+      font-weight: bold;
+      color: #c62828;
+    }
+
+    .formula {
+      margin-top: 24px;
+      font-size: 14px;
+      color: #555;
+      background: #f8fafc;
+      border-left: 4px solid #0078d4;
+      padding: 12px;
+      border-radius: 6px;
+      line-height: 1.6;
+    }
+
+    .error {
+      margin-top: 16px;
+      color: #c62828;
+      font-weight: bold;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gehaltsrechner bei geänderter Arbeitszeit</h1>
+    <p class="info">
+      Berechne dein neues monatliches <strong>Bruttogehalt</strong>, wenn sich deine
+      <strong>Wochenarbeitszeit</strong> ändert.
+    </p>
+
+    <div class="grid">
+      <div>
+        <label for="brutto">Aktuelles Brutto-Grundgehalt pro Monat (€)</label>
+        <input type="number" id="brutto" step="0.01" placeholder="z. B. 2600" />
+      </div>
+
+      <div>
+        <label for="altStunden">Aktuelle Wochenarbeitszeit (Stunden)</label>
+        <input type="number" id="altStunden" step="0.01" placeholder="z. B. 40" />
+      </div>
+
+      <div>
+        <label for="neuStunden">Neue Wochenarbeitszeit (Stunden)</label>
+        <input type="number" id="neuStunden" step="0.01" placeholder="z. B. 45" />
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn-primary" onclick="berechnen()">Berechnen</button>
+      <button class="btn-secondary" onclick="zuruecksetzen()">Zurücksetzen</button>
+    </div>
+
+    <div class="error" id="errorBox"></div>
+
+    <div class="result" id="resultBox">
+      <h2>Ergebnis</h2>
+      <div class="result-row">Stundenlohn (brutto): <span id="stundenlohn"></span></div>
+      <div class="result-row">Neues Bruttogehalt / Monat: <span id="neuesGehalt"></span></div>
+      <div class="result-row">Monatliche Differenz: <span id="differenz"></span></div>
+    </div>
+
+    <div class="formula">
+      <strong>Verwendete Formel:</strong><br>
+      Stundenlohn = Bruttogehalt / (Wochenstunden × 4,33)<br>
+      Neues Gehalt = Stundenlohn × neue Wochenstunden × 4,33<br><br>
+      <strong>Hinweis:</strong> Die Berechnung ist eine vereinfachte Brutto-Rechnung ohne Zuschläge,
+      Sonderzahlungen oder steuerliche Netto-Betrachtung.
+    </div>
+  </div>
+
+  <script>
+    function formatEuro(wert) {
+      return wert.toLocaleString("de-DE", {
+        style: "currency",
+        currency: "EUR"
+      });
+    }
+
+    function berechnen() {
+      const brutto = parseFloat(document.getElementById("brutto").value);
+      const altStunden = parseFloat(document.getElementById("altStunden").value);
+      const neuStunden = parseFloat(document.getElementById("neuStunden").value);
+
+      const errorBox = document.getElementById("errorBox");
+      const resultBox = document.getElementById("resultBox");
+
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+      resultBox.style.display = "none";
+
+      if (
+        isNaN(brutto) || isNaN(altStunden) || isNaN(neuStunden) ||
+        brutto <= 0 || altStunden <= 0 || neuStunden <= 0
+      ) {
+        errorBox.textContent = "Bitte alle Felder korrekt mit Werten größer als 0 ausfüllen.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      const stundenlohn = brutto / (altStunden * 4.33);
+      const neuesGehalt = stundenlohn * neuStunden * 4.33;
+      const differenz = neuesGehalt - brutto;
+
+      document.getElementById("stundenlohn").textContent = formatEuro(stundenlohn);
+      document.getElementById("neuesGehalt").textContent = formatEuro(neuesGehalt);
+
+      const differenzElement = document.getElementById("differenz");
+      differenzElement.textContent = formatEuro(differenz);
+
+      if (differenz >= 0) {
+        differenzElement.className = "highlight";
+      } else {
+        differenzElement.className = "negative";
+      }
+
+      resultBox.style.display = "block";
+    }
+
+    function zuruecksetzen() {
+      document.getElementById("brutto").value = "";
+      document.getElementById("altStunden").value = "";
+      document.getElementById("neuStunden").value = "";
+
+      document.getElementById("resultBox").style.display = "none";
+      document.getElementById("errorBox").style.display = "none";
+      document.getElementById("errorBox").textContent = "";
+    }
+  </script>
+</body>
+</html>

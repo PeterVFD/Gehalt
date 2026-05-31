@@ -1,473 +1,127 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gehaltsrechner mit Netto, Steuerklasse und Kinderfreibetrag</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 20px;
-      color: #222;
-    }
+<meta charset="UTF-8">
+<title>Gehaltsrechner Pro</title>
 
-    .container {
-      max-width: 860px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    }
+<style>
+body { font-family: Arial; background:#f4f6f8; margin:0; padding:20px;}
+.container { max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:10px;}
+input,select{ width:100%; padding:10px; margin-top:5px; border-radius:6px; border:1px solid #ccc;}
+button{ padding:10px 15px; margin-top:15px; cursor:pointer; border:none; border-radius:6px; }
+.primary{ background:#0078d4; color:#fff;}
+.result{ margin-top:20px; display:none; background:#f1f5f9; padding:15px; border-radius:8px;}
+</style>
 
-    h1 {
-      margin-top: 0;
-      font-size: 28px;
-      color: #111;
-    }
-
-    p.info {
-      color: #555;
-      line-height: 1.5;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 20px;
-    }
-
-    .full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    input, select {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      border: 1px solid #cfd6dd;
-      border-radius: 8px;
-      font-size: 16px;
-      background: #fff;
-    }
-
-    .hint {
-      margin-top: 5px;
-      font-size: 13px;
-      color: #666;
-      line-height: 1.4;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      padding: 12px 18px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .btn-primary {
-      background: #0078d4;
-      color: white;
-    }
-
-    .btn-secondary {
-      background: #e5e7eb;
-      color: #222;
-    }
-
-    .result {
-      margin-top: 24px;
-      padding: 18px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      display: none;
-    }
-
-    .result h2 {
-      margin-top: 0;
-      font-size: 22px;
-    }
-
-    .section-title {
-      margin-top: 18px;
-      margin-bottom: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #111;
-    }
-
-    .result-row {
-      margin: 10px 0;
-      font-size: 17px;
-    }
-
-    .small {
-      font-size: 14px;
-      color: #666;
-    }
-
-    .highlight {
-      font-weight: bold;
-      color: #0a5;
-    }
-
-    .negative {
-      font-weight: bold;
-      color: #c62828;
-    }
-
-    .formula {
-      margin-top: 24px;
-      font-size: 14px;
-      color: #555;
-      background: #f8fafc;
-      border-left: 4px solid #0078d4;
-      padding: 12px;
-      border-radius: 6px;
-      line-height: 1.6;
-    }
-
-    .error {
-      margin-top: 16px;
-      color: #c62828;
-      font-weight: bold;
-      display: none;
-    }
-
-    .box {
-      margin-top: 18px;
-      padding: 14px;
-      background: #fcfcfd;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-    }
-
-    @media (max-width: 720px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .container {
-        padding: 16px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Gehaltsrechner mit Netto-Schätzung</h1>
-    <p class="info">
-      Berechne dein neues monatliches <strong>Brutto</strong> und ein <strong>vereinfachtes Netto</strong>,
-      wenn sich deine <strong>Wochenarbeitszeit</strong> ändert. Die Netto-Schätzung berücksichtigt hier zusätzlich
-      <strong>Steuerklasse</strong> und <strong>Kinderfreibeträge</strong>.
-    </p>
 
-    <div class="grid">
-      <div>
-        <label for="brutto">Aktuelles Brutto-Grundgehalt pro Monat (€)</label>
-        <input type="number" id="brutto" step="0.01" placeholder="z. B. 2600" />
-      </div>
+<div class="container">
+<h2>Gehaltsrechner (inkl. Netto, Steuerklasse, Kinder, Kirchensteuer)</h2>
 
-      <div>
-        <label for="altStunden">Aktuelle Wochenarbeitszeit (Stunden)</label>
-        <input type="number" id="altStunden" step="0.01" placeholder="z. B. 40" />
-      </div>
+<label>Brutto (€)</label>
+<input id="brutto" type="number">
 
-      <div>
-        <label for="neuStunden">Neue Wochenarbeitszeit (Stunden)</label>
-        <input type="number" id="neuStunden" step="0.01" placeholder="z. B. 45" />
-      </div>
+<label>Wochenstunden (aktuell)</label>
+<input id="alt" type="number">
 
-      <div>
-        <label for="steuerklasse">Steuerklasse</label>
-        <select id="steuerklasse">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4" selected>4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-        </select>
-      </div>
+<label>Wochenstunden (neu)</label>
+<input id="neu" type="number">
 
-      <div>
-        <label for="kinderfreibetraege">Kinderfreibeträge (ELStAM, z. B. 0 / 0,5 / 1 / 1,5 / 2)</label>
-        <input type="number" id="kinderfreibetraege" step="0.5" value="0" placeholder="z. B. 1" />
-        <div class="hint">
-          Vereinfachung in diesem Rechner: <strong>1,0 Kinderfreibetrag = 4.878 € pro Jahr</strong>.
-        </div>
-      </div>
+<label>Steuerklasse</label>
+<select id="klasse">
+<option>1</option><option>2</option><option>3</option>
+<option selected>4</option>
+<option>5</option><option>6</option>
+</select>
 
-      <div>
-        <label for="kvZusatz">KV-Zusatzbeitrag Arbeitnehmer (%)</label>
-        <input type="number" id="kvZusatz" step="0.01" value="1.30" placeholder="z. B. 1.30" />
-        <div class="hint">Wird hälftig zum allgemeinen Arbeitnehmeranteil auf die Krankenversicherung addiert.</div>
-      </div>
+<label>Kinderfreibeträge</label>
+<input id="kinder" type="number" step="0.5" value="0">
 
-      <div class="full box">
-        <div><strong>In dieser Schätzung berücksichtigt:</strong></div>
-        <div class="small">• Steuerklassen 1 bis 6</div>
-        <div class="small">• Kinderfreibeträge als jährlicher Freibetrag in der Steuer-Schätzung</div>
-        <div class="small">• Arbeitnehmeranteile zur Renten-, Arbeitslosen-, Kranken- und Pflegeversicherung (vereinfachte Standardannahmen)</div>
-      </div>
-    </div>
+<label>Kirchensteuer</label>
+<select id="kirche">
+<option value="0">Nein</option>
+<option value="1">Ja (9%)</option>
+</select>
 
-    <div class="buttons">
-      <button class="btn-primary" onclick="berechnen()">Berechnen</button>
-      <button class="btn-secondary" onclick="zuruecksetzen()">Zurücksetzen</button>
-    </div>
+<label>KV Zusatz (%)</label>
+<input id="kv" type="number" value="1.3">
 
-    <div class="error" id="errorBox"></div>
+<button class="primary" onclick="calc()">Berechnen</button>
 
-    <div class="result" id="resultBox">
-      <h2>Ergebnis</h2>
+<div class="result" id="out"></div>
 
-      <div class="section-title">Brutto</div>
-      <div class="result-row">Stundenlohn (brutto): <span id="stundenlohn"></span></div>
-      <div class="result-row">Neues Bruttogehalt / Monat: <span id="neuesGehalt"></span></div>
-      <div class="result-row">Monatliche Brutto-Differenz: <span id="differenzBrutto"></span></div>
+</div>
 
-      <div class="section-title">Netto-Schätzung</div>
-      <div class="result-row">Aktuelles Netto / Monat (geschätzt): <span id="aktuellesNetto"></span></div>
-      <div class="result-row">Neues Netto / Monat (geschätzt): <span id="neuesNetto"></span></div>
-      <div class="result-row">Monatliche Netto-Differenz (geschätzt): <span id="differenzNetto"></span></div>
+<script>
 
-      <div class="section-title">Details der Netto-Schätzung</div>
-      <div class="result-row">Geschätzte Lohnsteuer / Monat aktuell: <span id="lohnsteuerAlt"></span></div>
-      <div class="result-row">Geschätzte Lohnsteuer / Monat neu: <span id="lohnsteuerNeu"></span></div>
-      <div class="result-row">Sozialabgaben / Monat aktuell: <span id="svAlt"></span></div>
-      <div class="result-row">Sozialabgaben / Monat neu: <span id="svNeu"></span></div>
-      <div class="result-row">Jährlich berücksichtigter Freibetrag gesamt: <span id="freibetragInfo"></span></div>
-    </div>
+const GRUND = 12348;
+const KIND = 4878;
 
-    <div class="formula">
-      <strong>Vereinfachte Berechnungslogik:</strong><br>
-      Stundenlohn = Bruttogehalt / (Wochenstunden × 4,33)<br>
-      Neues Brutto = Stundenlohn × neue Wochenstunden × 4,33<br>
-      Geschätzte Jahres-Lohnsteuer = tarifliche Steuer auf (Jahresbrutto − Freibeträge)<br>
-      Netto = Brutto − geschätzte Lohnsteuer − Sozialabgaben<br><br>
-      <strong>Wichtig:</strong> Diese Seite liefert eine <strong>vereinfachte Netto-Schätzung</strong> und ersetzt keinen amtlichen Rechner.
-      Für exakte Werte sind u. a. Kirchensteuer, Bundesland, Krankenkasse, Kinderlosenzuschlag in der Pflegeversicherung,
-      Faktorverfahren (Steuerklasse 4 mit Faktor), Einmalzahlungen und weitere ELStAM-Merkmale relevant.
-    </div>
-  </div>
+function euro(x){
+ return x.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
+}
 
-  <script>
-    const KONSTANTEN_2026 = {
-      GRUNDFREIBETRAG: 12348,
-      KINDERFREIBETRAG_PRO_EINHEIT: 4878,
-      ENTLASTUNG_ALLEINERZIEHEND: 4260,
-      ENTLASTUNG_JE_WEITERES_KIND: 240,
-      RV_AN: 0.093,
-      AV_AN: 0.013,
-      KV_ALLG_AN: 0.073,
-      PV_AN_MIT_KINDERN: 0.018,
-      PV_AN_OHNE_KINDERN: 0.024
-    };
+function tax(zve){
+ if(zve<=0) return 0;
+ return zve * 0.25; // bewusst einfache Näherung
+}
 
-    function formatEuro(wert) {
-      return wert.toLocaleString('de-DE', {
-        style: 'currency',
-        currency: 'EUR'
-      });
-    }
+function sozial(brutto, kinder, kv){
+ let pv = kinder>0 ? 0.018 : 0.024;
+ let kvs = 0.073 + (kv/100/2);
+ return brutto * (0.093 + 0.013 + pv + kvs);
+}
 
-    function setDiffClass(element, wert) {
-      if (wert >= 0) {
-        element.className = 'highlight';
-      } else {
-        element.className = 'negative';
-      }
-    }
+function calc(){
 
-    function getKinderAnzahlAusFreibetraegen(kinderfreibetraege) {
-      return Math.max(0, Math.round(kinderfreibetraege));
-    }
+ let brutto = +document.getElementById("brutto").value;
+ let alt = +document.getElementById("alt").value;
+ let neu = +document.getElementById("neu").value;
+ let klasse = +document.getElementById("klasse").value;
+ let kinder = +document.getElementById("kinder").value;
+ let kirche = +document.getElementById("kirche").value;
+ let kv = +document.getElementById("kv").value;
 
-    function getSteuerklassenFreibetrag(steuerklasse, kinderfreibetraege) {
-      const kinderAnzahl = getKinderAnzahlAusFreibetraegen(kinderfreibetraege);
-      let freibetrag = 0;
+ let stunden = brutto/(alt*4.33);
+ let neuBrutto = stunden*neu*4.33;
 
-      if (steuerklasse === 1 || steuerklasse === 4) {
-        freibetrag += KONSTANTEN_2026.GRUNDFREIBETRAG;
-      } else if (steuerklasse === 2) {
-        freibetrag += KONSTANTEN_2026.GRUNDFREIBETRAG;
-        if (kinderAnzahl > 0) {
-          freibetrag += KONSTANTEN_2026.ENTLASTUNG_ALLEINERZIEHEND;
-          if (kinderAnzahl > 1) {
-            freibetrag += (kinderAnzahl - 1) * KONSTANTEN_2026.ENTLASTUNG_JE_WEITERES_KIND;
-          }
-        }
-      } else if (steuerklasse === 3) {
-        freibetrag += KONSTANTEN_2026.GRUNDFREIBETRAG * 2;
-      } else if (steuerklasse === 5 || steuerklasse === 6) {
-        freibetrag += 0;
-      }
+ let fb = 0;
 
-      freibetrag += kinderfreibetraege * KONSTANTEN_2026.KINDERFREIBETRAG_PRO_EINHEIT;
-      return freibetrag;
-    }
+ if(klasse==1||klasse==4) fb=GRUND;
+ if(klasse==2) fb=GRUND+4260;
+ if(klasse==3) fb=GRUND*2;
+ if(klasse>=5) fb=0;
 
-    function berechneTarifsteuerVereinfacht(zvE) {
-      if (zvE <= 0) return 0;
+ fb += kinder*KIND;
 
-      let steuer = 0;
-      let rest = zvE;
+ let zve1 = brutto*12 - fb;
+ let zve2 = neuBrutto*12 - fb;
 
-      const stufen = [
-        { breite: 14000, von: 0.14, bis: 0.24 },
-        { breite: 20000, von: 0.24, bis: 0.42 },
-        { breite: 220000, von: 0.42, bis: 0.45 }
-      ];
+ let st1 = tax(zve1)/12;
+ let st2 = tax(zve2)/12;
 
-      for (const stufe of stufen) {
-        if (rest <= 0) break;
-        const teil = Math.min(rest, stufe.breite);
-        const avgSatz = (stufe.von + stufe.bis) / 2;
-        steuer += teil * avgSatz;
-        rest -= teil;
-      }
+ // Kirchensteuer
+ if(kirche==1){
+   st1 += st1*0.09;
+   st2 += st2*0.09;
+ }
 
-      if (rest > 0) {
-        steuer += rest * 0.45;
-      }
+ let sv1 = sozial(brutto,kinder,kv);
+ let sv2 = sozial(neuBrutto,kinder,kv);
 
-      return steuer;
-    }
+ let net1 = brutto - st1 - sv1;
+ let net2 = neuBrutto - st2 - sv2;
 
-    function berechneSozialabgabenMonat(bruttoMonat, kinderfreibetraege, kvZusatz) {
-      const hatKinder = kinderfreibetraege > 0;
-      const pvSatz = hatKinder ? KONSTANTEN_2026.PV_AN_MIT_KINDERN : KONSTANTEN_2026.PV_AN_OHNE_KINDERN;
-      const kvSatz = KONSTANTEN_2026.KV_ALLG_AN + (kvZusatz / 100 / 2);
-      const gesamtSatz = KONSTANTEN_2026.RV_AN + KONSTANTEN_2026.AV_AN + KONSTANTEN_2026.KV_SATZ_PLACEHOLDER + pvSatz;
-      return bruttoMonat * gesamtSatz;
-    }
+ document.getElementById("out").style.display="block";
+ document.getElementById("out").innerHTML =
+ "<b>Neues Brutto:</b> "+euro(neuBrutto)+"<br>"+
+ "<b>Netto alt:</b> "+euro(net1)+"<br>"+
+ "<b>Netto neu:</b> "+euro(net2)+"<br>"+
+ "<b>Differenz:</b> "+euro(net2-net1);
 
-    function berechneNetto(bruttoMonat, steuerklasse, kinderfreibetraege, kvZusatz) {
-      const freibetragJahr = getSteuerklassenFreibetrag(steuerklasse, kinderfreibetraege);
-      const jahresbrutto = bruttoMonat * 12;
-      const zvE = Math.max(0, jahresbrutto - freibetragJahr);
-      let jahressteuer = berechneTarifsteuerVereinfacht(zvE);
+}
 
-      if (steuerklasse === 5) {
-        jahressteuer *= 1.10;
-      }
-      if (steuerklasse === 6) {
-        jahressteuer *= 1.20;
-      }
-
-      const monatlicheSteuer = jahressteuer / 12;
-      const sozialabgabenMonat = berechneSozialabgabenMonat(bruttoMonat, kinderfreibetraege, kvZusatz);
-      const nettoMonat = bruttoMonat - monatlicheSteuer - sozialabgabenMonat;
-
-      return {
-        nettoMonat,
-        monatlicheSteuer,
-        sozialabgabenMonat,
-        freibetragJahr,
-        zvE
-      };
-    }
-
-    function berechnen() {
-      const brutto = parseFloat(document.getElementById('brutto').value);
-      const altStunden = parseFloat(document.getElementById('altStunden').value);
-      const neuStunden = parseFloat(document.getElementById('neuStunden').value);
-      const steuerklasse = parseInt(document.getElementById('steuerklasse').value, 10);
-      const kinderfreibetraege = parseFloat(document.getElementById('kinderfreibetraege').value);
-      const kvZusatz = parseFloat(document.getElementById('kvZusatz').value);
-
-      const errorBox = document.getElementById('errorBox');
-      const resultBox = document.getElementById('resultBox');
-
-      errorBox.style.display = 'none';
-      errorBox.textContent = '';
-      resultBox.style.display = 'none';
-
-      if (
-        isNaN(brutto) || isNaN(altStunden) || isNaN(neuStunden) || isNaN(steuerklasse) || isNaN(kinderfreibetraege) || isNaN(kvZusatz) ||
-        brutto <= 0 || altStunden <= 0 || neuStunden <= 0 || kinderfreibetraege < 0 || kvZusatz < 0
-      ) {
-        errorBox.textContent = 'Bitte alle Felder korrekt ausfüllen. Werte müssen größer oder gleich 0 sein.';
-        errorBox.style.display = 'block';
-        return;
-      }
-
-      const stundenlohn = brutto / (altStunden * 4.33);
-      const neuesGehalt = stundenlohn * neuStunden * 4.33;
-      const differenzBrutto = neuesGehalt - brutto;
-
-      const altNettoInfo = berechneNetto(brutto, steuerklasse, kinderfreibetraege, kvZusatz);
-      const neuNettoInfo = berechneNetto(neuesGehalt, steuerklasse, kinderfreibetraege, kvZusatz);
-      const differenzNetto = neuNettoInfo.nettoMonat - altNettoInfo.nettoMonat;
-
-      document.getElementById('stundenlohn').textContent = formatEuro(stundenlohn);
-      document.getElementById('neuesGehalt').textContent = formatEuro(neuesGehalt);
-      document.getElementById('aktuellesNetto').textContent = formatEuro(altNettoInfo.nettoMonat);
-      document.getElementById('neuesNetto').textContent = formatEuro(neuNettoInfo.nettoMonat);
-      document.getElementById('lohnsteuerAlt').textContent = formatEuro(altNettoInfo.monatlicheSteuer);
-      document.getElementById('lohnsteuerNeu').textContent = formatEuro(neuNettoInfo.monatlicheSteuer);
-      document.getElementById('svAlt').textContent = formatEuro(altNettoInfo.sozialabgabenMonat);
-      document.getElementById('svNeu').textContent = formatEuro(neuNettoInfo.sozialabgabenMonat);
-      document.getElementById('freibetragInfo').textContent = formatEuro(altNettoInfo.freibetragJahr);
-
-      const diffBruttoEl = document.getElementById('differenzBrutto');
-      diffBruttoEl.textContent = formatEuro(differenzBrutto);
-      setDiffClass(diffBruttoEl, differenzBrutto);
-
-      const diffNettoEl = document.getElementById('differenzNetto');
-      diffNettoEl.textContent = formatEuro(differenzNetto);
-      setDiffClass(diffNettoEl, differenzNetto);
-
-      resultBox.style.display = 'block';
-    }
-
-    function zuruecksetzen() {
-      document.getElementById('brutto').value = '';
-      document.getElementById('altStunden').value = '';
-      document.getElementById('neuStunden').value = '';
-      document.getElementById('steuerklasse').value = '4';
-      document.getElementById('kinderfreibetraege').value = '0';
-      document.getElementById('kvZusatz').value = '1.30';
-      document.getElementById('resultBox').style.display = 'none';
-      document.getElementById('errorBox').style.display = 'none';
-      document.getElementById('errorBox').textContent = '';
-    }
-
-    // Platzhalter durch den tatsächlich gewählten KV-Satz ersetzen
-    (function patchScript() {
-      const original = berechneSozialabgabenMonat;
-      berechneSozialabgabenMonat = function(bruttoMonat, kinderfreibetraege, kvZusatz) {
-        const hatKinder = kinderfreibetraege > 0;
-        const pvSatz = hatKinder ? KONSTANTEN_2026.PV_AN_MIT_KINDERN : KONSTANTEN_2026.PV_AN_OHNE_KINDERN;
-        const kvSatz = KONSTANTEN_2026.KV_ALLG_AN + (kvZusatz / 100 / 2);
-        const gesamtSatz = KONSTANTEN_2026.RV_AN + KONSTANTEN_2026.AV_AN + kvSatz + pvSatz;
-        return bruttoMonat * gesamtSatz;
-      };
-    })();
-  </script>
+</script>
 </body>
 </html>

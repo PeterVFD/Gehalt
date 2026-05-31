@@ -14,7 +14,7 @@
     }
 
     .container {
-      max-width: 700px;
+      max-width: 760px;
       margin: 0 auto;
       background: #fff;
       padding: 24px;
@@ -55,6 +55,12 @@
       font-size: 16px;
     }
 
+    .hint {
+      margin-top: 5px;
+      font-size: 13px;
+      color: #666;
+    }
+
     .buttons {
       display: flex;
       gap: 12px;
@@ -93,6 +99,14 @@
     .result h2 {
       margin-top: 0;
       font-size: 22px;
+    }
+
+    .section-title {
+      margin-top: 18px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #111;
     }
 
     .result-row {
@@ -143,8 +157,8 @@
   <div class="container">
     <h1>Gehaltsrechner bei geänderter Arbeitszeit</h1>
     <p class="info">
-      Berechne dein neues monatliches <strong>Bruttogehalt</strong>, wenn sich deine
-      <strong>Wochenarbeitszeit</strong> ändert.
+      Berechne dein neues monatliches <strong>Brutto-</strong> und ein <strong>geschätztes Netto-Gehalt</strong>,
+      wenn sich deine <strong>Wochenarbeitszeit</strong> ändert.
     </p>
 
     <div class="grid">
@@ -162,6 +176,12 @@
         <label for="neuStunden">Neue Wochenarbeitszeit (Stunden)</label>
         <input type="number" id="neuStunden" step="0.01" placeholder="z. B. 45" />
       </div>
+
+      <div>
+        <label for="abzuege">Geschätzte Abzüge in %</label>
+        <input type="number" id="abzuege" step="0.1" value="35" placeholder="z. B. 35" />
+        <div class="hint">Beispiel: 35 bedeutet, dass 35 % vom Brutto für Steuern/Sozialabgaben abgezogen werden.</div>
+      </div>
     </div>
 
     <div class="buttons">
@@ -173,17 +193,25 @@
 
     <div class="result" id="resultBox">
       <h2>Ergebnis</h2>
+
+      <div class="section-title">Brutto</div>
       <div class="result-row">Stundenlohn (brutto): <span id="stundenlohn"></span></div>
       <div class="result-row">Neues Bruttogehalt / Monat: <span id="neuesGehalt"></span></div>
-      <div class="result-row">Monatliche Differenz: <span id="differenz"></span></div>
+      <div class="result-row">Monatliche Brutto-Differenz: <span id="differenzBrutto"></span></div>
+
+      <div class="section-title">Netto-Schätzung</div>
+      <div class="result-row">Aktuelles Netto / Monat (geschätzt): <span id="aktuellesNetto"></span></div>
+      <div class="result-row">Neues Netto / Monat (geschätzt): <span id="neuesNetto"></span></div>
+      <div class="result-row">Monatliche Netto-Differenz (geschätzt): <span id="differenzNetto"></span></div>
     </div>
 
     <div class="formula">
-      <strong>Verwendete Formel:</strong><br>
+      <strong>Verwendete Formeln:</strong><br>
       Stundenlohn = Bruttogehalt / (Wochenstunden × 4,33)<br>
-      Neues Gehalt = Stundenlohn × neue Wochenstunden × 4,33<br><br>
-      <strong>Hinweis:</strong> Die Berechnung ist eine vereinfachte Brutto-Rechnung ohne Zuschläge,
-      Sonderzahlungen oder steuerliche Netto-Betrachtung.
+      Neues Brutto = Stundenlohn × neue Wochenstunden × 4,33<br>
+      Netto-Schätzung = Brutto × (1 - Abzüge / 100)<br><br>
+      <strong>Wichtig:</strong> Die Netto-Werte sind eine <strong>Schätzung</strong>. Eine exakte Netto-Berechnung hängt unter anderem
+      von Steuerklasse, Krankenversicherung, Kirchensteuer, Bundesland, Kindern und Freibeträgen ab.
     </div>
   </div>
 
@@ -195,10 +223,19 @@
       });
     }
 
+    function setDiffClass(element, wert) {
+      if (wert >= 0) {
+        element.className = "highlight";
+      } else {
+        element.className = "negative";
+      }
+    }
+
     function berechnen() {
       const brutto = parseFloat(document.getElementById("brutto").value);
       const altStunden = parseFloat(document.getElementById("altStunden").value);
       const neuStunden = parseFloat(document.getElementById("neuStunden").value);
+      const abzuege = parseFloat(document.getElementById("abzuege").value);
 
       const errorBox = document.getElementById("errorBox");
       const resultBox = document.getElementById("resultBox");
@@ -208,29 +245,34 @@
       resultBox.style.display = "none";
 
       if (
-        isNaN(brutto) || isNaN(altStunden) || isNaN(neuStunden) ||
-        brutto <= 0 || altStunden <= 0 || neuStunden <= 0
+        isNaN(brutto) || isNaN(altStunden) || isNaN(neuStunden) || isNaN(abzuege) ||
+        brutto <= 0 || altStunden <= 0 || neuStunden <= 0 || abzuege < 0 || abzuege >= 100
       ) {
-        errorBox.textContent = "Bitte alle Felder korrekt mit Werten größer als 0 ausfüllen.";
+        errorBox.textContent = "Bitte alle Felder korrekt ausfüllen. Abzüge müssen zwischen 0 und kleiner 100 liegen.";
         errorBox.style.display = "block";
         return;
       }
 
       const stundenlohn = brutto / (altStunden * 4.33);
       const neuesGehalt = stundenlohn * neuStunden * 4.33;
-      const differenz = neuesGehalt - brutto;
+      const differenzBrutto = neuesGehalt - brutto;
+
+      const aktuellesNetto = brutto * (1 - abzuege / 100);
+      const neuesNetto = neuesGehalt * (1 - abzuege / 100);
+      const differenzNetto = neuesNetto - aktuellesNetto;
 
       document.getElementById("stundenlohn").textContent = formatEuro(stundenlohn);
       document.getElementById("neuesGehalt").textContent = formatEuro(neuesGehalt);
+      document.getElementById("aktuellesNetto").textContent = formatEuro(aktuellesNetto);
+      document.getElementById("neuesNetto").textContent = formatEuro(neuesNetto);
 
-      const differenzElement = document.getElementById("differenz");
-      differenzElement.textContent = formatEuro(differenz);
+      const diffBruttoEl = document.getElementById("differenzBrutto");
+      diffBruttoEl.textContent = formatEuro(differenzBrutto);
+      setDiffClass(diffBruttoEl, differenzBrutto);
 
-      if (differenz >= 0) {
-        differenzElement.className = "highlight";
-      } else {
-        differenzElement.className = "negative";
-      }
+      const diffNettoEl = document.getElementById("differenzNetto");
+      diffNettoEl.textContent = formatEuro(differenzNetto);
+      setDiffClass(diffNettoEl, differenzNetto);
 
       resultBox.style.display = "block";
     }
@@ -239,6 +281,7 @@
       document.getElementById("brutto").value = "";
       document.getElementById("altStunden").value = "";
       document.getElementById("neuStunden").value = "";
+      document.getElementById("abzuege").value = "35";
 
       document.getElementById("resultBox").style.display = "none";
       document.getElementById("errorBox").style.display = "none";
